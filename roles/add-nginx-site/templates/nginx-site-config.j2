@@ -1,0 +1,44 @@
+# Secured connections by default
+server {
+
+  listen 443 ssl;
+  server_name {{ nginx_site_name }};
+
+  # Dedicated log
+  access_log /var/log/nginx/{{ nginx_site_name }}.log;
+  error_log  /var/log/nginx/{{ nginx_site_name }}.log;
+
+  # SSL Configuration
+  ssl on;
+  ssl_certificate     /etc/ssl/{{ nginx_site_name }}/fullchain.pem;
+  ssl_certificate_key /etc/ssl/{{ nginx_site_name }}/privkey.pem;
+
+  # Allow well-known file for ssl
+  location ~ /.well-known {
+          allow all;
+  }
+
+  # List of the site url locations to redirect
+  {% for nginx_proxy_location,nginx_proxy_params in nginx_site_locations.iteritems() %}
+location {{ nginx_proxy_location }} {
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade "upgrade";
+    proxy_set_header Connection "upgrade";
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_pass {{ nginx_proxy_params.nginx_proxy_pass }};
+  }
+
+  {% endfor %}
+
+}
+
+# Unsecured connection redirects to secure connections
+server {
+
+  listen 80;
+  server_name {{ nginx_site_name }};
+  return 301 https://$server_name$request_uri;
+  
+}

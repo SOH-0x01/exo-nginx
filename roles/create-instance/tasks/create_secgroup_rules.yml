@@ -1,0 +1,27 @@
+#  Create instance Security Groups rules
+  - name: Create instance SSH rule for remote access
+    local_action:
+      module: cs_securitygroup_rule
+      security_group: "{{ instance_security_group_name}}"
+      start_port: 22
+      end_port: 22
+      cidr: "{{ instance_ssh_cidr }}"
+    tags: sgr
+
+  - name: Create Http 80 rule
+    local_action:
+      module: cs_securitygroup_rule
+      security_group: "{{ instance_security_group_name}}"
+      start_port: 80
+      end_port: 80
+      cidr: "{{ instance_external_cidr }}"
+    tags: sgr
+
+  - name: Create Https 443 rule
+    local_action:
+      module: cs_securitygroup_rule
+      security_group: "{{ instance_security_group_name}}"
+      start_port: 443
+      end_port: 443
+      cidr: "{{ instance_external_cidr }}"
+    tags: sgr

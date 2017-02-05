@@ -1,0 +1,28 @@
+# Add a nginx site
+
+  # Create the site config, i.e. it is avalable
+  - name: Push nginx site configuration
+    template:
+      src: nginx-site-config.j2
+      dest: /etc/nginx/sites-available/{{ nginx_site_name }}
+      backup: yes
+      owner: root
+      group: root
+      mode: 0644
+    tags: nx-as
+
+  # Register/Unregister the site
+  - file:
+      src: /etc/nginx/sites-available/{{ nginx_site_name }}
+      dest: /etc/nginx/sites-enabled/{{ nginx_site_name }}
+      owner: root
+      group: root
+      state: link
+    when: nginx_enable_site
+    tags: nx-as
+
+  - file:
+      dest: /etc/nginx/sites-enabled/{{ nginx_site_name }}
+      state: absent
+    when: not nginx_enable_site
+    tags: nx-as

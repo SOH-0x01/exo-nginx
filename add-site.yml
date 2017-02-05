@@ -1,0 +1,24 @@
+# Configure and add the new site
+- hosts: kingslanding
+  gather_facts: False
+  become: True
+  vars:
+    nginx_site_name: mysite
+    nginx_enable_site: False
+    nginx_site_locations:
+      /url1/:
+        nginx_proxy_pass: http://localhost:19001/
+      /url2/:
+        nginx_proxy_pass: http://localhost:19002/
+  roles:
+    - add-nginx-site
+
+# Finally restart the server
+- hosts: localhost
+  connection: local
+  tasks:
+    - name: Restart instance
+      local_action:
+        module: cs_instance
+        name: "{{ instance_prefix }}-{{ instance_name }}"
+        state: restarted

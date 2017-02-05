@@ -1,0 +1,25 @@
+# Setup nginx as a reverse proxy
+
+  - name: Install nginx
+    apt:
+      name: "{{ item }}"
+      cache_valid_time: 3600
+    tags: nx
+    with_items:
+      - nginx
+
+  - name: Push nginx global configuration
+    template:
+      src: nginx-global-config.j2
+      dest: /etc/nginx/nginx.conf
+      backup: yes
+      owner: root
+      group: root
+      mode: 0644
+    tags: nx
+
+  - file:
+      dest: /etc/nginx/sites-enabled/default
+      state: absent
+    when: nginx_disable_default_site
+    tags: nx-as
